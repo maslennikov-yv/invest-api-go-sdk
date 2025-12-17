@@ -24,9 +24,21 @@ func (s *StopOrdersServiceClient) PostStopOrder(req *PostStopOrderRequest) (*Pos
 		err  error
 	)
 	if req != nil && req.ConfirmMarginTrade {
+		if s.logger != nil {
+			s.logger.Infof("PostStopOrder: confirm_margin_trade=true (dynamic invoke) instrument_id=%s account_id=%s direction=%v qty=%d stop_order_type=%v",
+				req.InstrumentId, req.AccountId, req.Direction, req.Quantity, req.StopOrderType)
+		}
 		in, buildErr := buildPostStopOrderDynamic(req)
 		if buildErr != nil {
 			return &PostStopOrderResponse{PostStopOrderResponse: nil, Header: header}, buildErr
+		}
+		// Extra sanity log: ensure the dynamic message actually has confirm_margin_trade=true set.
+		if s.logger != nil {
+			if f := in.Descriptor().Fields().ByName("confirm_margin_trade"); f != nil {
+				s.logger.Infof("PostStopOrder: dynamic field confirm_margin_trade=%v message=%s", in.Get(f).Bool(), in.Descriptor().FullName())
+			} else {
+				s.logger.Infof("PostStopOrder: dynamic field confirm_margin_trade NOT FOUND in message=%s", in.Descriptor().FullName())
+			}
 		}
 		resp = &pb.PostStopOrderResponse{}
 		err = s.conn.Invoke(s.ctx, stopOrdersPostMethod, in, resp, grpc.Header(&header), grpc.Trailer(&trailer))
