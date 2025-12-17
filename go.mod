@@ -1,4 +1,4 @@
-module github.com/tinkoff/invest-api-go-sdk
+module github.com/maslennikov-yv/invest-api-go-sdk
 
 go 1.21
 

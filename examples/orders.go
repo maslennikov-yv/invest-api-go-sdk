@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tinkoff/invest-api-go-sdk/investgo"
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
+	"github.com/maslennikov-yv/invest-api-go-sdk/investgo"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

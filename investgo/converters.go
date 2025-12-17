@@ -4,8 +4,8 @@ import (
 	"math"
 	"time"
 
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 	"github.com/shopspring/decimal"
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
