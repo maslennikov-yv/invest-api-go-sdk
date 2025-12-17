@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )

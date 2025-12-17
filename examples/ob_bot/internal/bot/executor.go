@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tinkoff/invest-api-go-sdk/investgo"
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
+	"github.com/maslennikov-yv/invest-api-go-sdk/investgo"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 )
 
 type Instrument struct {

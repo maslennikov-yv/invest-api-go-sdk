@@ -13,11 +13,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/maslennikov-yv/invest-api-go-sdk/examples/interval_bot/internal/bot"
+	"github.com/maslennikov-yv/invest-api-go-sdk/investgo"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 	"github.com/schollz/progressbar/v3"
 	"github.com/sourcegraph/conc/pool"
-	"github.com/tinkoff/invest-api-go-sdk/examples/interval_bot/internal/bot"
-	"github.com/tinkoff/invest-api-go-sdk/investgo"
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

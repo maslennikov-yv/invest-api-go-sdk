@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
-	"github.com/tinkoff/invest-api-go-sdk/retry"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
+	"github.com/maslennikov-yv/invest-api-go-sdk/retry"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

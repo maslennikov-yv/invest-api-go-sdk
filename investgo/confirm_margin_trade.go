@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/jhump/protoreflect/desc/protoparse"
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"

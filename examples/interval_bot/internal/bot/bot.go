@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/maslennikov-yv/invest-api-go-sdk/investgo"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 	"github.com/montanaflynn/stats"
-	"github.com/tinkoff/invest-api-go-sdk/investgo"
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
 )
 
 // IntervalStrategyConfig - Конфигурация стратегии интервального бота

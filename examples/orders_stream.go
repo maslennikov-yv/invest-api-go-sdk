@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tinkoff/invest-api-go-sdk/investgo"
+	"github.com/maslennikov-yv/invest-api-go-sdk/investgo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

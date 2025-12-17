@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/maslennikov-yv/invest-api-go-sdk/investgo"
+	pb "github.com/maslennikov-yv/invest-api-go-sdk/proto"
 	"github.com/mattn/go-sqlite3"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/schollz/progressbar/v3"
-	"github.com/tinkoff/invest-api-go-sdk/investgo"
-	pb "github.com/tinkoff/invest-api-go-sdk/proto"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
