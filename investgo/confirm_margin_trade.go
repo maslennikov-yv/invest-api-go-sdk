@@ -2,8 +2,8 @@ package investgo
 
 import (
 	"fmt"
-	"path/filepath"
-	"runtime"
+	"io"
+	"strings"
 	"sync"
 
 	"github.com/jhump/protoreflect/desc/protoparse"
@@ -30,14 +30,137 @@ type confirmProtoCache struct {
 
 var confirmCache confirmProtoCache
 
+// NOTE: We MUST NOT read .proto files from disk at runtime. In production deployments we ship
+// only the compiled binary (no module cache / source tree), so filesystem-based parsing breaks.
+// Keep these minimal proto definitions embedded as strings and parse via a custom accessor.
+var confirmProtoFiles = map[string]string{
+	"google/protobuf/timestamp.proto": `syntax = "proto3";
+
+package google.protobuf;
+
+option go_package = "google.golang.org/protobuf/types/known/timestamppb";
+
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+`,
+	"common.proto": `syntax = "proto3";
+
+package tinkoff.public.invest.api.contract.v1;
+
+option go_package = "./;investapi";
+
+import "google/protobuf/timestamp.proto";
+
+message Quotation {
+  int64 units = 1;
+  int32 nano = 2;
+}
+`,
+	"orders.proto": `syntax = "proto3";
+
+package tinkoff.public.invest.api.contract.v1;
+
+option go_package = "./;investapi";
+
+import "common.proto";
+import "google/protobuf/timestamp.proto";
+
+service OrdersService {
+  rpc PostOrder(PostOrderRequest) returns (PostOrderResponse);
+}
+
+enum OrderDirection {
+  ORDER_DIRECTION_UNSPECIFIED = 0;
+  ORDER_DIRECTION_BUY = 1;
+  ORDER_DIRECTION_SELL = 2;
+}
+
+enum OrderType {
+  ORDER_TYPE_UNSPECIFIED = 0;
+  ORDER_TYPE_LIMIT = 1;
+  ORDER_TYPE_MARKET = 2;
+  ORDER_TYPE_BESTPRICE = 3;
+}
+
+message PostOrderRequest {
+  string figi = 1 [ deprecated = true ];
+  int64 quantity = 2;
+  Quotation price = 3;
+  OrderDirection direction = 4;
+  string account_id = 5;
+  OrderType order_type = 6;
+  string order_id = 7;
+  string instrument_id = 8;
+  bool confirm_margin_trade = 9;
+}
+
+message PostOrderResponse {
+  string order_id = 1;
+}
+`,
+	"stoporders.proto": `syntax = "proto3";
+
+package tinkoff.public.invest.api.contract.v1;
+
+option go_package = "./;investapi";
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+service StopOrdersService {
+  rpc PostStopOrder(PostStopOrderRequest) returns (PostStopOrderResponse);
+}
+
+enum StopOrderDirection {
+  STOP_ORDER_DIRECTION_UNSPECIFIED = 0;
+  STOP_ORDER_DIRECTION_BUY = 1;
+  STOP_ORDER_DIRECTION_SELL = 2;
+}
+
+enum StopOrderExpirationType {
+  STOP_ORDER_EXPIRATION_TYPE_UNSPECIFIED = 0;
+  STOP_ORDER_EXPIRATION_TYPE_GOOD_TILL_CANCEL = 1;
+  STOP_ORDER_EXPIRATION_TYPE_GOOD_TILL_DATE = 2;
+}
+
+enum StopOrderType {
+  STOP_ORDER_TYPE_UNSPECIFIED = 0;
+  STOP_ORDER_TYPE_TAKE_PROFIT = 1;
+  STOP_ORDER_TYPE_STOP_LOSS = 2;
+  STOP_ORDER_TYPE_STOP_LIMIT = 3;
+}
+
+message PostStopOrderRequest {
+  string figi = 1 [ deprecated = true ];
+  int64 quantity = 2;
+  Quotation price = 3;
+  Quotation stop_price = 4;
+  StopOrderDirection direction = 5;
+  string account_id = 6;
+  StopOrderExpirationType expiration_type = 7;
+  StopOrderType stop_order_type = 8;
+  google.protobuf.Timestamp expire_date = 9;
+  string instrument_id = 10;
+  bool confirm_margin_trade = 11;
+}
+
+message PostStopOrderResponse {
+  string stop_order_id = 1;
+}
+`,
+}
+
 func loadConfirmDescriptors() error {
 	confirmCache.once.Do(func() {
-		_, thisFile, _, _ := runtime.Caller(0)
-		// thisFile = .../investgo/confirm_margin_trade.go
-		confirmProtoDir := filepath.Clean(filepath.Join(filepath.Dir(thisFile), "..", "proto_confirm"))
-
 		p := protoparse.Parser{
-			ImportPaths: []string{confirmProtoDir},
+			Accessor: func(filename string) (io.ReadCloser, error) {
+				if s, ok := confirmProtoFiles[filename]; ok {
+					return io.NopCloser(strings.NewReader(s)), nil
+				}
+				return nil, fmt.Errorf("proto file not found: %s", filename)
+			},
 		}
 
 		fds, err := p.ParseFiles(
