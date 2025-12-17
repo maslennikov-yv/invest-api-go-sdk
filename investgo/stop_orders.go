@@ -19,17 +19,30 @@ type StopOrdersServiceClient struct {
 // PostStopOrder - Метод выставления стоп-заявки
 func (s *StopOrdersServiceClient) PostStopOrder(req *PostStopOrderRequest) (*PostStopOrderResponse, error) {
 	var header, trailer metadata.MD
-	resp, err := s.pbClient.PostStopOrder(s.ctx, &pb.PostStopOrderRequest{
-		Quantity:       req.Quantity,
-		Price:          req.Price,
-		StopPrice:      req.StopPrice,
-		Direction:      req.Direction,
-		AccountId:      req.AccountId,
-		ExpirationType: req.ExpirationType,
-		StopOrderType:  req.StopOrderType,
-		ExpireDate:     TimeToTimestamp(req.ExpireDate),
-		InstrumentId:   req.InstrumentId,
-	}, grpc.Header(&header), grpc.Trailer(&trailer))
+	var (
+		resp *pb.PostStopOrderResponse
+		err  error
+	)
+	if req != nil && req.ConfirmMarginTrade {
+		in, buildErr := buildPostStopOrderDynamic(req)
+		if buildErr != nil {
+			return &PostStopOrderResponse{PostStopOrderResponse: nil, Header: header}, buildErr
+		}
+		resp = &pb.PostStopOrderResponse{}
+		err = s.conn.Invoke(s.ctx, stopOrdersPostMethod, in, resp, grpc.Header(&header), grpc.Trailer(&trailer))
+	} else {
+		resp, err = s.pbClient.PostStopOrder(s.ctx, &pb.PostStopOrderRequest{
+			Quantity:       req.Quantity,
+			Price:          req.Price,
+			StopPrice:      req.StopPrice,
+			Direction:      req.Direction,
+			AccountId:      req.AccountId,
+			ExpirationType: req.ExpirationType,
+			StopOrderType:  req.StopOrderType,
+			ExpireDate:     TimeToTimestamp(req.ExpireDate),
+			InstrumentId:   req.InstrumentId,
+		}, grpc.Header(&header), grpc.Trailer(&trailer))
+	}
 	if err != nil {
 		header = trailer
 	}

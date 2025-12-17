@@ -19,15 +19,28 @@ type OrdersServiceClient struct {
 // PostOrder - Метод выставления биржевой заявки
 func (os *OrdersServiceClient) PostOrder(req *PostOrderRequest) (*PostOrderResponse, error) {
 	var header, trailer metadata.MD
-	resp, err := os.pbClient.PostOrder(os.ctx, &pb.PostOrderRequest{
-		Quantity:     req.Quantity,
-		Price:        req.Price,
-		Direction:    req.Direction,
-		AccountId:    req.AccountId,
-		OrderType:    req.OrderType,
-		OrderId:      req.OrderId,
-		InstrumentId: req.InstrumentId,
-	}, grpc.Header(&header), grpc.Trailer(&trailer))
+	var (
+		resp *pb.PostOrderResponse
+		err  error
+	)
+	if req != nil && req.ConfirmMarginTrade {
+		in, buildErr := buildPostOrderDynamic(req)
+		if buildErr != nil {
+			return &PostOrderResponse{PostOrderResponse: nil, Header: header}, buildErr
+		}
+		resp = &pb.PostOrderResponse{}
+		err = os.conn.Invoke(os.ctx, ordersPostMethod, in, resp, grpc.Header(&header), grpc.Trailer(&trailer))
+	} else {
+		resp, err = os.pbClient.PostOrder(os.ctx, &pb.PostOrderRequest{
+			Quantity:     req.Quantity,
+			Price:        req.Price,
+			Direction:    req.Direction,
+			AccountId:    req.AccountId,
+			OrderType:    req.OrderType,
+			OrderId:      req.OrderId,
+			InstrumentId: req.InstrumentId,
+		}, grpc.Header(&header), grpc.Trailer(&trailer))
+	}
 	if err != nil {
 		header = trailer
 	}
@@ -40,15 +53,38 @@ func (os *OrdersServiceClient) PostOrder(req *PostOrderRequest) (*PostOrderRespo
 // Buy - Метод выставления поручения на покупку инструмента
 func (os *OrdersServiceClient) Buy(req *PostOrderRequestShort) (*PostOrderResponse, error) {
 	var header, trailer metadata.MD
-	resp, err := os.pbClient.PostOrder(os.ctx, &pb.PostOrderRequest{
-		Quantity:     req.Quantity,
-		Price:        req.Price,
-		Direction:    pb.OrderDirection_ORDER_DIRECTION_BUY,
-		AccountId:    req.AccountId,
-		OrderType:    req.OrderType,
-		OrderId:      req.OrderId,
-		InstrumentId: req.InstrumentId,
-	}, grpc.Header(&header), grpc.Trailer(&trailer))
+	var (
+		resp *pb.PostOrderResponse
+		err  error
+	)
+	if req != nil && req.ConfirmMarginTrade {
+		inReq := &PostOrderRequest{
+			InstrumentId:       req.InstrumentId,
+			Quantity:           req.Quantity,
+			Price:              req.Price,
+			Direction:          pb.OrderDirection_ORDER_DIRECTION_BUY,
+			AccountId:          req.AccountId,
+			OrderType:          req.OrderType,
+			OrderId:            req.OrderId,
+			ConfirmMarginTrade: true,
+		}
+		in, buildErr := buildPostOrderDynamic(inReq)
+		if buildErr != nil {
+			return &PostOrderResponse{PostOrderResponse: nil, Header: header}, buildErr
+		}
+		resp = &pb.PostOrderResponse{}
+		err = os.conn.Invoke(os.ctx, ordersPostMethod, in, resp, grpc.Header(&header), grpc.Trailer(&trailer))
+	} else {
+		resp, err = os.pbClient.PostOrder(os.ctx, &pb.PostOrderRequest{
+			Quantity:     req.Quantity,
+			Price:        req.Price,
+			Direction:    pb.OrderDirection_ORDER_DIRECTION_BUY,
+			AccountId:    req.AccountId,
+			OrderType:    req.OrderType,
+			OrderId:      req.OrderId,
+			InstrumentId: req.InstrumentId,
+		}, grpc.Header(&header), grpc.Trailer(&trailer))
+	}
 	if err != nil {
 		header = trailer
 	}
@@ -61,15 +97,38 @@ func (os *OrdersServiceClient) Buy(req *PostOrderRequestShort) (*PostOrderRespon
 // Sell - Метод выставления поручения на продажу инструмента
 func (os *OrdersServiceClient) Sell(req *PostOrderRequestShort) (*PostOrderResponse, error) {
 	var header, trailer metadata.MD
-	resp, err := os.pbClient.PostOrder(os.ctx, &pb.PostOrderRequest{
-		Quantity:     req.Quantity,
-		Price:        req.Price,
-		Direction:    pb.OrderDirection_ORDER_DIRECTION_SELL,
-		AccountId:    req.AccountId,
-		OrderType:    req.OrderType,
-		OrderId:      req.OrderId,
-		InstrumentId: req.InstrumentId,
-	}, grpc.Header(&header), grpc.Trailer(&trailer))
+	var (
+		resp *pb.PostOrderResponse
+		err  error
+	)
+	if req != nil && req.ConfirmMarginTrade {
+		inReq := &PostOrderRequest{
+			InstrumentId:       req.InstrumentId,
+			Quantity:           req.Quantity,
+			Price:              req.Price,
+			Direction:          pb.OrderDirection_ORDER_DIRECTION_SELL,
+			AccountId:          req.AccountId,
+			OrderType:          req.OrderType,
+			OrderId:            req.OrderId,
+			ConfirmMarginTrade: true,
+		}
+		in, buildErr := buildPostOrderDynamic(inReq)
+		if buildErr != nil {
+			return &PostOrderResponse{PostOrderResponse: nil, Header: header}, buildErr
+		}
+		resp = &pb.PostOrderResponse{}
+		err = os.conn.Invoke(os.ctx, ordersPostMethod, in, resp, grpc.Header(&header), grpc.Trailer(&trailer))
+	} else {
+		resp, err = os.pbClient.PostOrder(os.ctx, &pb.PostOrderRequest{
+			Quantity:     req.Quantity,
+			Price:        req.Price,
+			Direction:    pb.OrderDirection_ORDER_DIRECTION_SELL,
+			AccountId:    req.AccountId,
+			OrderType:    req.OrderType,
+			OrderId:      req.OrderId,
+			InstrumentId: req.InstrumentId,
+		}, grpc.Header(&header), grpc.Trailer(&trailer))
+	}
 	if err != nil {
 		header = trailer
 	}

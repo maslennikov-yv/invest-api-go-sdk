@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package google.protobuf;
+
+option go_package = "google.golang.org/protobuf/types/known/timestamppb";
+
+// Minimal Timestamp definition, used only to satisfy proto imports for runtime parsing.
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+

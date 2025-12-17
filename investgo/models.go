@@ -17,15 +17,18 @@ type PostOrderRequest struct {
 	AccountId    string
 	OrderType    pb.OrderType
 	OrderId      string
+	// ConfirmMarginTrade подтверждает маржинальную торговлю для КНУР (см. confirm_margin_trade в API).
+	ConfirmMarginTrade bool
 }
 
 type PostOrderRequestShort struct {
-	InstrumentId string
-	Quantity     int64
-	Price        *pb.Quotation
-	AccountId    string
-	OrderType    pb.OrderType
-	OrderId      string
+	InstrumentId       string
+	Quantity           int64
+	Price              *pb.Quotation
+	AccountId          string
+	OrderType          pb.OrderType
+	OrderId            string
+	ConfirmMarginTrade bool
 }
 
 type ReplaceOrderRequest struct {
@@ -569,15 +572,16 @@ type GetOperationsByCursorRequest struct {
 }
 
 type PostStopOrderRequest struct {
-	InstrumentId   string
-	Quantity       int64
-	Price          *pb.Quotation
-	StopPrice      *pb.Quotation
-	Direction      pb.StopOrderDirection
-	AccountId      string
-	ExpirationType pb.StopOrderExpirationType
-	StopOrderType  pb.StopOrderType
-	ExpireDate     time.Time
+	InstrumentId       string
+	Quantity           int64
+	Price              *pb.Quotation
+	StopPrice          *pb.Quotation
+	Direction          pb.StopOrderDirection
+	AccountId          string
+	ExpirationType     pb.StopOrderExpirationType
+	StopOrderType      pb.StopOrderType
+	ExpireDate         time.Time
+	ConfirmMarginTrade bool
 }
 
 type SandboxPayInRequest struct {
