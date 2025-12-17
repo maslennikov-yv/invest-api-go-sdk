@@ -24,6 +24,10 @@ func (s *StopOrdersServiceClient) PostStopOrder(req *PostStopOrderRequest) (*Pos
 		err  error
 	)
 	if req != nil && req.ConfirmMarginTrade {
+		if s.logger != nil {
+			s.logger.Infof("PostStopOrder: confirm_margin_trade=true (dynamic invoke) instrument_id=%s account_id=%s direction=%v qty=%d stop_order_type=%v",
+				req.InstrumentId, req.AccountId, req.Direction, req.Quantity, req.StopOrderType)
+		}
 		in, buildErr := buildPostStopOrderDynamic(req)
 		if buildErr != nil {
 			return &PostStopOrderResponse{PostStopOrderResponse: nil, Header: header}, buildErr
