@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package tinkoff.public.invest.api.contract.v1;
+
+option go_package = "./;investapi";
+option java_package = "ru.tinkoff.piapi.contract.v1";
+option java_multiple_files = true;
+option csharp_namespace = "Tinkoff.InvestApi.V1";
+option objc_class_prefix = "TIAPI";
+option php_namespace = "Tinkoff\\Invest\\V1";
+
+import "common.proto";
+import "google/protobuf/timestamp.proto";
+
+service OrdersService {
+  rpc PostOrder(PostOrderRequest) returns (PostOrderResponse);
+}
+
+enum OrderDirection {
+  ORDER_DIRECTION_UNSPECIFIED = 0;
+  ORDER_DIRECTION_BUY = 1;
+  ORDER_DIRECTION_SELL = 2;
+}
+
+enum OrderType {
+  ORDER_TYPE_UNSPECIFIED = 0;
+  ORDER_TYPE_LIMIT = 1;
+  ORDER_TYPE_MARKET = 2;
+  ORDER_TYPE_BESTPRICE = 3;
+}
+
+message PostOrderRequest {
+  string figi = 1 [ deprecated = true ];
+  int64 quantity = 2;
+  Quotation price = 3;
+  OrderDirection direction = 4;
+  string account_id = 5;
+  OrderType order_type = 6;
+  string order_id = 7;
+  string instrument_id = 8;
+  bool confirm_margin_trade = 9;
+}
+
+message PostOrderResponse {
+  string order_id = 1;
+}
+
+
