@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -42,6 +43,15 @@ func NewClient(ctx context.Context, conf Config, l Logger) (*Client, error) {
 		retry.WithCodes(codes.Unavailable, codes.Internal),
 		retry.WithBackoff(retry.BackoffLinear(WAIT_BETWEEN)),
 		retry.WithMax(conf.MaxRetries),
+		// Surface retries through the app logger (the default callback only writes to x/net/trace, which
+		// is invisible in prod). This makes the real gRPC codes behind retried RPCs observable. Note:
+		// order-placing RPCs opt out of retry (retry.WithMax(0) per call), so they never reach here —
+		// their code is logged directly at the placement site instead.
+		retry.WithOnRetryCallback(func(ctx context.Context, attempt uint, err error) {
+			if l != nil {
+				l.Infof("grpc retry: attempt=%d code=%s err=%v", attempt, status.Code(err).String(), err)
+			}
+		}),
 	}
 
 	// при исчерпывании лимита запросов в минуту, нужно ждать дольше
@@ -75,7 +85,10 @@ func NewClient(ctx context.Context, conf Config, l Logger) (*Client, error) {
 			TokenSource: oauth2.StaticTokenSource(&oauth2.Token{AccessToken: conf.Token}),
 		}),
 		grpc.WithChainUnaryInterceptor(unaryInterceptors...),
-		grpc.WithChainStreamInterceptor(streamInterceptors...))
+		grpc.WithChainStreamInterceptor(streamInterceptors...),
+		// Diagnostic: surface wire-level attempts/sends for order-placing RPCs only, to localize
+		// below-interceptor order multiplication (transparent transport retry vs broker-side).
+		grpc.WithStatsHandler(&orderWireTracer{l: l}))
 	if err != nil {
 		return nil, err
 	}
